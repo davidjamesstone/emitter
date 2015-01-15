@@ -12,7 +12,22 @@ module.exports = Emitter;
  */
 
 function Emitter(obj) {
-  if (obj) return mixin(obj);
+  var ctx = obj || this;
+  
+  var callbacks;
+  Object.defineProperty(ctx, '__callbacks', {
+    get: function() {
+      return callbacks = callbacks || {};
+    },
+    set: function(value) {
+      callbacks = value;
+    }
+  });
+  
+  if (obj) {
+    ctx = mixin(obj);
+    return ctx;
+  }
 };
 
 /**
@@ -41,8 +56,7 @@ function mixin(obj) {
 
 Emitter.prototype.on =
 Emitter.prototype.addEventListener = function(event, fn){
-  this._callbacks = this._callbacks || {};
-  (this._callbacks[event] = this._callbacks[event] || [])
+  (this.__callbacks[event] = this.__callbacks[event] || [])
     .push(fn);
   return this;
 };
@@ -82,21 +96,20 @@ Emitter.prototype.off =
 Emitter.prototype.removeListener =
 Emitter.prototype.removeAllListeners =
 Emitter.prototype.removeEventListener = function(event, fn){
-  this._callbacks = this._callbacks || {};
-
+  
   // all
   if (0 == arguments.length) {
-    this._callbacks = {};
+    this.__callbacks = {};
     return this;
   }
 
   // specific event
-  var callbacks = this._callbacks[event];
+  var callbacks = this.__callbacks[event];
   if (!callbacks) return this;
 
   // remove all handlers
   if (1 == arguments.length) {
-    delete this._callbacks[event];
+    delete this.__callbacks[event];
     return this;
   }
 
@@ -120,10 +133,9 @@ Emitter.prototype.removeEventListener = function(event, fn){
  * @return {Emitter}
  */
 
-Emitter.prototype.emit = function(event){
-  this._callbacks = this._callbacks || {};
+Emitter.prototype.emit = function(event) {
   var args = [].slice.call(arguments, 1)
-    , callbacks = this._callbacks[event];
+    , callbacks = this.__callbacks[event];
 
   if (callbacks) {
     callbacks = callbacks.slice(0);
@@ -143,9 +155,8 @@ Emitter.prototype.emit = function(event){
  * @api public
  */
 
-Emitter.prototype.listeners = function(event){
-  this._callbacks = this._callbacks || {};
-  return this._callbacks[event] || [];
+Emitter.prototype.listeners = function(event) {
+  return this.__callbacks[event] || [];
 };
 
 /**
@@ -156,6 +167,6 @@ Emitter.prototype.listeners = function(event){
  * @api public
  */
 
-Emitter.prototype.hasListeners = function(event){
-  return !! this.listeners(event).length;
+Emitter.prototype.hasListeners = function(event) {
+  return !!this.listeners(event).length;
 };
