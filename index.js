@@ -28,7 +28,7 @@ function Emitter(obj) {
     ctx = mixin(obj);
     return ctx;
   }
-};
+}
 
 /**
  * Mixin the emitter properties.
