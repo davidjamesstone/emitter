@@ -1,4 +1,3 @@
-
 /**
  * Expose `Emitter`.
  */
@@ -13,17 +12,17 @@ module.exports = Emitter;
 
 function Emitter(obj) {
   var ctx = obj || this;
-  
-  var callbacks;
-  Object.defineProperty(ctx, '__callbacks', {
-    get: function() {
-      return callbacks = callbacks || {};
-    },
-    set: function(value) {
-      callbacks = value;
-    }
-  });
-  
+
+  // var callbacks;
+  // Object.defineProperty(ctx, '__callbacks', {
+  //   get: function() {
+  //     return callbacks = callbacks || {};
+  //   },
+  //   set: function(value) {
+  //     callbacks = value;
+  //   }
+  // });
+
   if (obj) {
     ctx = mixin(obj);
     return ctx;
@@ -55,11 +54,11 @@ function mixin(obj) {
  */
 
 Emitter.prototype.on =
-Emitter.prototype.addEventListener = function(event, fn){
-  (this.__callbacks[event] = this.__callbacks[event] || [])
+  Emitter.prototype.addEventListener = function(event, fn) {
+    (this.__callbacks[event] = this.__callbacks[event] || [])
     .push(fn);
-  return this;
-};
+    return this;
+  };
 
 /**
  * Adds an `event` listener that will be invoked a single
@@ -71,7 +70,7 @@ Emitter.prototype.addEventListener = function(event, fn){
  * @api public
  */
 
-Emitter.prototype.once = function(event, fn){
+Emitter.prototype.once = function(event, fn) {
   function on() {
     this.off(event, on);
     fn.apply(this, arguments);
@@ -93,37 +92,37 @@ Emitter.prototype.once = function(event, fn){
  */
 
 Emitter.prototype.off =
-Emitter.prototype.removeListener =
-Emitter.prototype.removeAllListeners =
-Emitter.prototype.removeEventListener = function(event, fn){
-  
-  // all
-  if (0 == arguments.length) {
-    this.__callbacks = {};
-    return this;
-  }
+  Emitter.prototype.removeListener =
+  Emitter.prototype.removeAllListeners =
+  Emitter.prototype.removeEventListener = function(event, fn) {
 
-  // specific event
-  var callbacks = this.__callbacks[event];
-  if (!callbacks) return this;
-
-  // remove all handlers
-  if (1 == arguments.length) {
-    delete this.__callbacks[event];
-    return this;
-  }
-
-  // remove specific handler
-  var cb;
-  for (var i = 0; i < callbacks.length; i++) {
-    cb = callbacks[i];
-    if (cb === fn || cb.fn === fn) {
-      callbacks.splice(i, 1);
-      break;
+    // all
+    if (0 == arguments.length) {
+      this.__callbacks = {};
+      return this;
     }
-  }
-  return this;
-};
+
+    // specific event
+    var callbacks = this.__callbacks[event];
+    if (!callbacks) return this;
+
+    // remove all handlers
+    if (1 == arguments.length) {
+      delete this.__callbacks[event];
+      return this;
+    }
+
+    // remove specific handler
+    var cb;
+    for (var i = 0; i < callbacks.length; i++) {
+      cb = callbacks[i];
+      if (cb === fn || cb.fn === fn) {
+        callbacks.splice(i, 1);
+        break;
+      }
+    }
+    return this;
+  };
 
 /**
  * Emit `event` with the given args.
@@ -134,8 +133,8 @@ Emitter.prototype.removeEventListener = function(event, fn){
  */
 
 Emitter.prototype.emit = function(event) {
-  var args = [].slice.call(arguments, 1)
-    , callbacks = this.__callbacks[event];
+  var args = [].slice.call(arguments, 1),
+    callbacks = this.__callbacks[event];
 
   if (callbacks) {
     callbacks = callbacks.slice(0);
